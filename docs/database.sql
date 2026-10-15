@@ -168,16 +168,6 @@ GROUP BY faculty
 HAVING AVG(gpa) >= 3.5;
 
 
-SELECT status, COUNT(*) AS total_applications 
-FROM applications 
-GROUP BY status;
-
-
-SELECT id, student_id, total_points 
-FROM applications 
-WHERE total_points > (SELECT AVG(total_points) FROM applications);
-
-
 SELECT social_status, 
        MAX(gpa) AS max_gpa, 
        MIN(gpa) AS min_gpa 
