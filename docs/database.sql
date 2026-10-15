@@ -135,3 +135,67 @@ SELECT * FROM students;
 SELECT * FROM rooms;
 SELECT * FROM applications;
 SELECT * FROM qr_orders;
+
+
+SELECT full_name, email 
+FROM users 
+WHERE role = 'Student';
+
+
+SELECT * 
+FROM students 
+WHERE gpa >= 3.5 AND course = 2;
+
+
+SELECT DISTINCT faculty 
+FROM students;
+
+
+SELECT user_id, faculty, gpa 
+FROM students 
+ORDER BY gpa DESC;
+
+
+SELECT faculty, 
+       COUNT(user_id) AS student_count, 
+       ROUND(AVG(gpa), 2) AS avg_gpa 
+FROM students 
+GROUP BY faculty;
+
+SELECT faculty, ROUND(AVG(gpa), 2) AS avg_gpa 
+FROM students 
+GROUP BY faculty 
+HAVING AVG(gpa) >= 3.5;
+
+
+SELECT status, COUNT(*) AS total_applications 
+FROM applications 
+GROUP BY status;
+
+
+SELECT id, student_id, total_points 
+FROM applications 
+WHERE total_points > (SELECT AVG(total_points) FROM applications);
+
+
+SELECT social_status, 
+       MAX(gpa) AS max_gpa, 
+       MIN(gpa) AS min_gpa 
+FROM students 
+WHERE social_status != 'None' 
+GROUP BY social_status;
+
+
+SELECT room_number, capacity, occupied_beds, 
+       (capacity - occupied_beds) AS free_beds 
+FROM rooms 
+WHERE (capacity - occupied_beds) > 0 
+ORDER BY free_beds DESC;
+
+
+SELECT s.faculty, COUNT(a.id) AS approved_count 
+FROM students s 
+JOIN applications a ON s.user_id = a.student_id 
+WHERE a.status = 'Approved' 
+GROUP BY s.faculty 
+HAVING COUNT(a.id) >= 1;
