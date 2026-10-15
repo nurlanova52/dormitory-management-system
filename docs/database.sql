@@ -192,10 +192,3 @@ FROM rooms
 WHERE (capacity - occupied_beds) > 0 
 ORDER BY free_beds DESC;
 
-
-SELECT s.faculty, COUNT(a.id) AS approved_count 
-FROM students s 
-JOIN applications a ON s.user_id = a.student_id 
-WHERE a.status = 'Approved' 
-GROUP BY s.faculty 
-HAVING COUNT(a.id) >= 1;
