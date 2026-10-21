@@ -195,3 +195,29 @@ JOIN applications a ON s.user_id = a.student_id
 WHERE a.status = 'Approved' 
 GROUP BY s.faculty 
 HAVING COUNT(a.id) >= 1;
+
+
+SELECT s.full_name, a.status, a.room_number 
+FROM students s 
+JOIN applications a ON s.user_id = a.student_id;
+
+
+SELECT full_name, gpa, faculty 
+FROM students 
+WHERE gpa >= (SELECT AVG(gpa) FROM students);
+
+
+SELECT full_name, email 
+FROM users 
+WHERE id IN (SELECT student_id FROM applications WHERE status = 'Approved');
+
+
+SELECT full_name, gpa, 
+       CASE 
+           WHEN gpa >= 3.7 THEN 'Үздік студент'
+           WHEN gpa >= 3.0 THEN 'Жақсы студент'
+           ELSE 'Қанағаттанарлық'
+       END AS academic_status 
+FROM students;
+
+
