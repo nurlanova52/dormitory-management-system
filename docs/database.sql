@@ -55,7 +55,7 @@ CREATE TABLE qr_orders (
     FOREIGN KEY (room_number) REFERENCES rooms(room_number)
 );
 
-
+-- Деректерді қосу
 INSERT INTO users (iin, full_name, email, role) VALUES 
 ('050101500111', 'Әлібеков Асан Серікұлы', 'asan@kaznu.kz', 'Student'),
 ('040202600222', 'Қасымова Аружан Мұратқызы', 'aruzhan@kaznu.kz', 'Student'),
@@ -130,22 +130,20 @@ WHERE room_number = 305;
 DELETE FROM applications 
 WHERE status = 'Rejected';
 
+
 SELECT * FROM users;
 SELECT * FROM students;
 SELECT * FROM rooms;
 SELECT * FROM applications;
 SELECT * FROM qr_orders;
 
-
 SELECT full_name, email 
 FROM users 
 WHERE role = 'Student';
 
-
 SELECT * 
 FROM students 
 WHERE gpa >= 3.5 AND course = 2;
-
 
 SELECT DISTINCT faculty 
 FROM students;
@@ -160,17 +158,14 @@ SELECT faculty,
 FROM students 
 GROUP BY faculty;
 
-
 SELECT faculty, ROUND(AVG(gpa), 2) AS avg_gpa 
 FROM students 
 GROUP BY faculty 
 HAVING AVG(gpa) >= 3.5;
 
-
 SELECT status, COUNT(*) AS total_applications 
 FROM applications 
 GROUP BY status;
-
 
 SELECT id, student_id, total_points 
 FROM applications 
@@ -183,11 +178,43 @@ FROM students
 WHERE social_status != 'None' 
 GROUP BY social_status;
 
+
 SELECT room_number, capacity, occupied_beds, 
        (capacity - occupied_beds) AS free_beds 
 FROM rooms 
 WHERE (capacity - occupied_beds) > 0 
 ORDER BY free_beds DESC;
 
+SELECT u.full_name, a.status, q.room_number 
+FROM students s 
+JOIN users u ON s.user_id = u.id
+JOIN applications a ON s.user_id = a.student_id 
+LEFT JOIN qr_orders q ON a.id = q.application_id;
 
 
+SELECT u.full_name, s.gpa, s.faculty 
+FROM students s 
+JOIN users u ON s.user_id = u.id
+WHERE s.gpa >= (SELECT AVG(gpa) FROM students);
+
+
+SELECT full_name, email 
+FROM users 
+WHERE id IN (SELECT student_id FROM applications WHERE status = 'Approved');
+
+
+SELECT u.full_name, s.gpa, 
+       CASE 
+           WHEN s.gpa >= 3.7 THEN 'Үздік студент'
+           WHEN s.gpa >= 3.0 THEN 'Жақсы студент'
+           ELSE 'Қанағаттанарлық'
+       END AS academic_status 
+FROM students s
+JOIN users u ON s.user_id = u.id;
+
+SELECT s.faculty, COUNT(a.id) AS approved_count 
+FROM students s 
+JOIN applications a ON s.user_id = a.student_id 
+WHERE a.status = 'Approved' 
+GROUP BY s.faculty 
+HAVING COUNT(a.id) >= 1;
