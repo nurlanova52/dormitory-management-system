@@ -6,19 +6,19 @@ graph TD
         A3[Әкімші]
     end
 
-    subgraph Presentation ["2. Пайдаланушы интерфейсі (Presentation Layer)"]
+    subgraph Presentation ["2. Пайдаланушы интерфейсі "]
         B[Веб-интерфейс / Браузер<br/>- Логин мен пароль енгізу<br/>- Жатақханаға өтінім беру<br/>- Бөлмелерді таңдау және көру]
     end
 
-    subgraph Business ["3. Қолданбалы логика (Business Logic Layer)"]
+    subgraph Business ["3. Қолданбалы логика "]
         C[Бизнес-процестерді өңдеу модулі<br/>- Авторизация мен рөлдерді тексеру<br/>- Өтінімдерді қабылдау/қабылдамау<br/>- Бос орындарды автоматты есептеу<br/>- Қонақтарды және QR келуді тіркеу]
     end
 
-    subgraph DataAccess ["4. Деректерге қол жеткізу (Data Access Layer)"]
+    subgraph DataAccess ["4. Деректерге қол жеткізу "]
         D[Деректерге қол жеткізу компоненті<br/>- SQL сұраныстарын генерациялау<br/>- Дерекқормен байланыс драйвері]
     end
 
-    subgraph Database ["5. Дерекқор (Database / Data Layer)"]
+    subgraph Database ["5. Дерекқор "]
         E[(SQLite Дерекқоры<br/>- users<br/>- students<br/>- rooms<br/>- applications<br/>- visitors)]
     end
 
@@ -31,4 +31,5 @@ graph TD
     E -->|Data Response / Нәтиже| D
     D -->|Өңделген деректер| C
     C -->|HTTP Response / UI жаңарту| B
-    B -->|Экранда көрсету| A1 & A2 & A3  
+    B -->|Экранда көрсету| A1 & A2 & A3
+    ```  
