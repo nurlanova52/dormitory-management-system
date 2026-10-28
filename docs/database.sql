@@ -55,7 +55,6 @@ CREATE TABLE qr_orders (
     FOREIGN KEY (room_number) REFERENCES rooms(room_number)
 );
 
--- Деректерді қосу
 INSERT INTO users (iin, full_name, email, role) VALUES 
 ('050101500111', 'Әлібеков Асан Серікұлы', 'asan@kaznu.kz', 'Student'),
 ('040202600222', 'Қасымова Аружан Мұратқызы', 'aruzhan@kaznu.kz', 'Student'),
@@ -218,3 +217,4 @@ JOIN applications a ON s.user_id = a.student_id
 WHERE a.status = 'Approved' 
 GROUP BY s.faculty 
 HAVING COUNT(a.id) >= 1;
+
