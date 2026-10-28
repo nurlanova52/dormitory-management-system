@@ -19,7 +19,7 @@ graph TD
     end
 
     subgraph Database ["5. Дерекқор "]
-        E[(SQLite Дерекқоры<br/>- users<br/>- students<br/>- rooms<br/>- applications<br/>- visitors)]
+        E[(SQLite Дерекқоры<br/>- users<br/>- students<br/>- rooms<br/>- applications<br/>)]
     end
 
     %% Байланыстар мен деректер ағыны
