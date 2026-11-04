@@ -1,0 +1,28 @@
+{
+  "name": "main",
+  "version": "1.0.0",
+  "description": "- Студенттердің жатақханаға онлайн өтінім беруі\r - Өтінімдерді қарастыру және орындарды бөлу\r - Жатақхана тұрғындарының тізімін басқару\r ## Қолданылған құралдар\r - VS Code\r - UML / Mermaid диаграммалары\r - Git & GitHub",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nurlanova52/dormitory-management-system.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/nurlanova52/dormitory-management-system/issues"
+  },
+  "homepage": "https://github.com/nurlanova52/dormitory-management-system#readme",
+  "dependencies": {
+    "express": "^5.3.0",
+    "sqlite3": "^6.0.1"
+  }
+}
