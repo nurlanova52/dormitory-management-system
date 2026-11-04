@@ -1,7 +1,10 @@
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
+const fs = require("fs");
 
 const dbPath = path.resolve(__dirname, "database.sqlite");
+// docs папкасындағы түпнұсқа database.sql файлына жол
+const sqlScriptPath = path.resolve(__dirname, "../database.sql");
 
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
@@ -9,20 +12,22 @@ const db = new sqlite3.Database(dbPath, (err) => {
     } else {
         console.log("SQLite дерекқорына сәтті қосылды.");
 
-        // students кестесі жоқ болса, автоматты түрде құру
-        db.run(`CREATE TABLE IF NOT EXISTS students (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            full_name TEXT NOT NULL,
-            faculty TEXT NOT NULL,
-            gpa REAL,
-            room_number INTEGER
-        )`, (err) => {
-            if (err) {
-                console.error("Кесте құру қатесі:", err.message);
-            } else {
-                console.log("'students' кестесі дайын.");
-            }
-        });
+        // PRAGMA foreign_keys қосу
+        db.run("PRAGMA foreign_keys = ON;");
+
+        // database.sql файлын оқып, дерекқорға толық жүктеу
+        if (fs.existsSync(sqlScriptPath)) {
+            const sqlScript = fs.readFileSync(sqlScriptPath, "utf8");
+            db.exec(sqlScript, (err) => {
+                if (err) {
+                    console.error("SQL скриптін орындау қатесі:", err.message);
+                } else {
+                    console.log("database.sql файлындағы барлық кестелер мен деректер сәтті жүктелді!");
+                }
+            });
+        } else {
+            console.log("Ескерту: database.sql файлы табылмады.");
+        }
     }
 });
 

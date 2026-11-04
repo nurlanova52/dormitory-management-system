@@ -4,9 +4,14 @@ const app = express();
 
 app.use(express.json());
 
-// 1. Барлық студенттерді алу (GET)
+// 1. Барлық студенттерді алу (users және students кестелерін біріктіріп) (GET)
 app.get("/api/students", (req, res) => {
-    db.all("SELECT * FROM students", [], (err, rows) => {
+    const query = `
+        SELECT s.user_id, u.full_name, u.email, s.faculty, s.gpa, s.course, s.social_status 
+        FROM students s 
+        JOIN users u ON s.user_id = u.id
+    `;
+    db.all(query, [], (err, rows) => {
         if (err) {
             return res.status(500).json({ message: "Сервер қатесі", error: err.message });
         }
@@ -17,7 +22,13 @@ app.get("/api/students", (req, res) => {
 // 2. ID бойынша студентті алу (GET)
 app.get("/api/students/:id", (req, res) => {
     const id = req.params.id;
-    db.get("SELECT * FROM students WHERE id = ?", [id], (err, row) => {
+    const query = `
+        SELECT s.user_id, u.full_name, u.email, s.faculty, s.gpa, s.course, s.social_status 
+        FROM students s 
+        JOIN users u ON s.user_id = u.id
+        WHERE s.user_id = ?
+    `;
+    db.get(query, [id], (err, row) => {
         if (err) {
             return res.status(500).json({ message: "Сервер қатесі", error: err.message });
         }
@@ -28,24 +39,44 @@ app.get("/api/students/:id", (req, res) => {
     });
 });
 
-// 3. Жаңа студент қосу (POST)
+// 3. Жаңа студент қосу (POST - users және students кестелеріне қатар қосу)
 app.post("/api/students", (req, res) => {
-    const { full_name, faculty, gpa, room_number } = req.body;
-    if (!full_name || !faculty) {
+    const { iin, full_name, email, faculty, gpa, course, social_status } = req.body;
+    
+    if (!full_name || !email || !faculty || !iin) {
         return res.status(400).json({ message: "Міндетті өрістерді толтырыңыз" });
     }
 
-    const query = `INSERT INTO students (full_name, faculty, gpa, room_number) VALUES (?, ?, ?, ?)`;
-    db.run(query, [full_name, faculty, gpa || 0.0, room_number || null], function(err) {
-        if (err) {
-            return res.status(500).json({ message: "Студентті қосу кезінде қате", error: err.message });
-        }
-        res.status(201).json({
-            id: this.lastID,
-            full_name,
-            faculty,
-            gpa,
-            room_number
+    db.serialize(() => {
+        db.run("BEGIN TRANSACTION;");
+
+        const userQuery = `INSERT INTO users (iin, full_name, email, role) VALUES (?, ?, ?, 'Student')`;
+        db.run(userQuery, [iin, full_name, email], function(err) {
+            if (err) {
+                db.run("ROLLBACK;");
+                return res.status(500).json({ message: "Қолданушыны қосу қатесі", error: err.message });
+            }
+
+            const userId = this.lastID;
+            const studentQuery = `INSERT INTO students (user_id, gpa, course, faculty, social_status) VALUES (?, ?, ?, ?, ?)`;
+            
+            db.run(studentQuery, [userId, gpa || 0.0, course || 1, faculty, social_status || 'None'], (err) => {
+                if (err) {
+                    db.run("ROLLBACK;");
+                    return res.status(500).json({ message: "Студентті қосу қатесі", error: err.message });
+                }
+
+                db.run("COMMIT;");
+                res.status(201).json({
+                    user_id: userId,
+                    full_name,
+                    email,
+                    faculty,
+                    gpa: gpa || 0.0,
+                    course: course || 1,
+                    social_status: social_status || 'None'
+                });
+            });
         });
     });
 });
@@ -53,28 +84,45 @@ app.post("/api/students", (req, res) => {
 // 4. Студент ақпаратын жаңарту (PUT)
 app.put("/api/students/:id", (req, res) => {
     const id = req.params.id;
-    const { full_name, faculty, gpa, room_number } = req.body;
+    const { full_name, faculty, gpa, course, social_status } = req.body;
     
     if (!full_name || !faculty) {
         return res.status(400).json({ message: "Міндетті өрістерді толтырыңыз" });
     }
 
-    const query = `UPDATE students SET full_name = ?, faculty = ?, gpa = ?, room_number = ? WHERE id = ?`;
-    db.run(query, [full_name, faculty, gpa, room_number, id], function(err) {
-        if (err) {
-            return res.status(500).json({ message: "Сервер қатесі", error: err.message });
-        }
-        if (this.changes === 0) {
-            return res.status(404).json({ message: "Студент табылмады" });
-        }
-        res.json({ message: "Студент деректері сәтті жаңартылды" });
+    db.serialize(() => {
+        db.run("BEGIN TRANSACTION;");
+
+        const userQuery = `UPDATE users SET full_name = ? WHERE id = ?`;
+        db.run(userQuery, [full_name, id], (err) => {
+            if (err) {
+                db.run("ROLLBACK;");
+                return res.status(500).json({ message: "Сервер қатесі", error: err.message });
+            }
+
+            const studentQuery = `UPDATE students SET faculty = ?, gpa = ?, course = ?, social_status = ? WHERE user_id = ?`;
+            db.run(studentQuery, [faculty, gpa, course, social_status, id], function(err) {
+                if (err) {
+                    db.run("ROLLBACK;");
+                    return res.status(500).json({ message: "Сервер қатесі", error: err.message });
+                }
+                if (this.changes === 0) {
+                    db.run("ROLLBACK;");
+                    return res.status(404).json({ message: "Студент табылмады" });
+                }
+
+                db.run("COMMIT;");
+                res.json({ message: "Студент деректері сәтті жаңартылды" });
+            });
+        });
     });
 });
 
 // 5. Студентті жою (DELETE)
 app.delete("/api/students/:id", (req, res) => {
     const id = req.params.id;
-    db.run("DELETE FROM students WHERE id = ?", [id], function(err) {
+    // CASCADE арқылы users кестесінен өшірсек, students кестесінен де автоматты түрде өшеді
+    db.run("DELETE FROM users WHERE id = ? AND role = 'Student'", [id], function(err) {
         if (err) {
             return res.status(500).json({ message: "Сервер қатесі", error: err.message });
         }
