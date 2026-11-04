@@ -4,11 +4,11 @@ const db = require("./db");
 const app = express();
 app.use(express.json());
 
-// Кіріс деректерін тексеру
-function validate(body) {
+// rooms кестесі: room_number (PK), capacity, occupied_beds
+function validate(body, needNumber) {
     const { room_number, capacity } = body;
     const occupied = body.occupied_beds ?? 0;
-    if (!room_number || !capacity) {
+    if ((needNumber && !room_number) || !capacity) {
         return "Міндетті өрістерді толтырыңыз (room_number, capacity)";
     }
     if (capacity <= 0) return "capacity 0-ден үлкен болуы керек";
@@ -19,54 +19,47 @@ function validate(body) {
 }
 
 // 1. Барлық бөлмелерді алу
-app.get("/api/rooms", async (req, res) => {
+app.get("/api/rooms", (req, res) => {
     try {
-        const [rooms] = await db.query("SELECT * FROM rooms");
-        res.json(rooms);
+        res.json(db.prepare("SELECT * FROM rooms").all());
     } catch (error) {
         res.status(500).json({ message: "Сервер қатесі" });
     }
 });
 
-// 2. ID бойынша бөлмені алу
-app.get("/api/rooms/:id", async (req, res) => {
+// 2. Нөмірі бойынша бөлмені алу
+app.get("/api/rooms/:id", (req, res) => {
     try {
-        const [rooms] = await db.query(
-            "SELECT * FROM rooms WHERE id = ?",
-            [req.params.id]
-        );
-        if (rooms.length === 0) {
+        const room = db.prepare(
+            "SELECT * FROM rooms WHERE room_number = ?"
+        ).get(req.params.id);
+
+        if (!room) {
             return res.status(404).json({ message: "Бөлме табылмады" });
         }
-        res.json(rooms[0]);
+        res.json(room);
     } catch (error) {
         res.status(500).json({ message: "Сервер қатесі" });
     }
 });
 
 // 3. Жаңа бөлме қосу
-app.post("/api/rooms", async (req, res) => {
+app.post("/api/rooms", (req, res) => {
     try {
-        const err = validate(req.body);
+        const err = validate(req.body, true);
         if (err) return res.status(400).json({ message: err });
 
         const { room_number, capacity } = req.body;
         const occupied_beds = req.body.occupied_beds ?? 0;
 
-        const [result] = await db.query(
+        db.prepare(
             `INSERT INTO rooms (room_number, capacity, occupied_beds)
-             VALUES (?, ?, ?)`,
-            [room_number, capacity, occupied_beds]
-        );
+             VALUES (?, ?, ?)`
+        ).run(room_number, capacity, occupied_beds);
 
-        res.status(201).json({
-            id: result.insertId,
-            room_number,
-            capacity,
-            occupied_beds
-        });
+        res.status(201).json({ room_number, capacity, occupied_beds });
     } catch (error) {
-        if (error.code === "ER_DUP_ENTRY") {
+        if (String(error.message).includes("UNIQUE")) {
             return res.status(409).json({ message: "Мұндай бөлме нөмірі бар" });
         }
         res.status(500).json({ message: "Бөлмені қосу кезінде қате" });
@@ -74,45 +67,44 @@ app.post("/api/rooms", async (req, res) => {
 });
 
 // 4. Бөлме ақпаратын жаңарту
-app.put("/api/rooms/:id", async (req, res) => {
+app.put("/api/rooms/:id", (req, res) => {
     try {
-        const err = validate(req.body);
+        const err = validate(req.body, false);
         if (err) return res.status(400).json({ message: err });
 
-        const { room_number, capacity } = req.body;
+        const { capacity } = req.body;
         const occupied_beds = req.body.occupied_beds ?? 0;
 
-        const [result] = await db.query(
+        const result = db.prepare(
             `UPDATE rooms
-             SET room_number = ?, capacity = ?, occupied_beds = ?
-             WHERE id = ?`,
-            [room_number, capacity, occupied_beds, req.params.id]
-        );
+             SET capacity = ?, occupied_beds = ?
+             WHERE room_number = ?`
+        ).run(capacity, occupied_beds, req.params.id);
 
-        if (result.affectedRows === 0) {
+        if (result.changes === 0) {
             return res.status(404).json({ message: "Бөлме табылмады" });
         }
         res.json({ message: "Бөлме жаңартылды" });
     } catch (error) {
-        if (error.code === "ER_DUP_ENTRY") {
-            return res.status(409).json({ message: "Мұндай бөлме нөмірі бар" });
-        }
         res.status(500).json({ message: "Сервер қатесі" });
     }
 });
 
 // 5. Бөлмені жою
-app.delete("/api/rooms/:id", async (req, res) => {
+app.delete("/api/rooms/:id", (req, res) => {
     try {
-        const [result] = await db.query(
-            "DELETE FROM rooms WHERE id = ?",
-            [req.params.id]
-        );
-        if (result.affectedRows === 0) {
+        const result = db.prepare(
+            "DELETE FROM rooms WHERE room_number = ?"
+        ).run(req.params.id);
+
+        if (result.changes === 0) {
             return res.status(404).json({ message: "Бөлме табылмады" });
         }
         res.json({ message: "Бөлме сәтті жойылды" });
     } catch (error) {
+        if (String(error.message).includes("FOREIGN KEY")) {
+            return res.status(409).json({ message: "Бөлмеге QR-бұйрық байланған, жоюға болмайды" });
+        }
         res.status(500).json({ message: "Сервер қатесі" });
     }
 });

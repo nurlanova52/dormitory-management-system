@@ -24,12 +24,12 @@
       }
     },
     {
-      "name": "2. GET ID=1 бөлме",
+      "name": "2. GET 301 бөлме",
       "request": {
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://localhost:3000/api/rooms/1",
+          "raw": "http://localhost:3000/api/rooms/301",
           "protocol": "http",
           "host": [
             "localhost"
@@ -38,7 +38,7 @@
           "path": [
             "api",
             "rooms",
-            "1"
+            "301"
           ]
         }
       }
@@ -77,7 +77,7 @@
       }
     },
     {
-      "name": "4. PUT бөлмені жаңарту",
+      "name": "4. PUT 301 бөлмені жаңарту",
       "request": {
         "method": "PUT",
         "header": [
@@ -87,7 +87,7 @@
           }
         ],
         "url": {
-          "raw": "http://localhost:3000/api/rooms/1",
+          "raw": "http://localhost:3000/api/rooms/301",
           "protocol": "http",
           "host": [
             "localhost"
@@ -96,12 +96,12 @@
           "path": [
             "api",
             "rooms",
-            "1"
+            "301"
           ]
         },
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"room_number\": 301,\n  \"capacity\": 4,\n  \"occupied_beds\": 3\n}",
+          "raw": "{\n  \"capacity\": 4,\n  \"occupied_beds\": 3\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -111,12 +111,12 @@
       }
     },
     {
-      "name": "5. DELETE ID=3 бөлме",
+      "name": "5. DELETE 304 бөлме",
       "request": {
         "method": "DELETE",
         "header": [],
         "url": {
-          "raw": "http://localhost:3000/api/rooms/3",
+          "raw": "http://localhost:3000/api/rooms/304",
           "protocol": "http",
           "host": [
             "localhost"
@@ -125,13 +125,13 @@
           "path": [
             "api",
             "rooms",
-            "3"
+            "304"
           ]
         }
       }
     },
     {
-      "name": "6. GET ID=999 (404)",
+      "name": "6. GET 999 (404)",
       "request": {
         "method": "GET",
         "header": [],
