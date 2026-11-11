@@ -217,4 +217,3 @@ JOIN applications a ON s.user_id = a.student_id
 WHERE a.status = 'Approved' 
 GROUP BY s.faculty 
 HAVING COUNT(a.id) >= 1;
-
