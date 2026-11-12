@@ -16,7 +16,7 @@ print("Дерекқор сәтті жүктелді!\n")
 
 #Осал сұраныс (SQL Injection тексеру)
 print(" Осал код (SQL Injection) ")
-search_name = input("Ізделетін аты-жөнді енгізіңіз: ")
+search_name = input("Ізделетін аты-жөнді енгізіңіз(' OR 1=1 --): ")
 
 # Қауіпті сұраныс (айнымалыны тікелей қосу)
 vulnerable_query = f"SELECT * FROM users WHERE full_name = '{search_name}'"
