@@ -1,4 +1,4 @@
-import sqlite3
+import sqlite3 
 import numpy as np
 import streamlit as st
 from sklearn.linear_model import LinearRegression

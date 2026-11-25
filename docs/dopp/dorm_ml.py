@@ -5,7 +5,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 
-# 1. Дерекқорға қосылу
+# Дерекқорға қосылу
 conn = sqlite3.connect("docs/database.sqlite")
 cursor = conn.cursor()
 
@@ -16,7 +16,7 @@ with open("docs/database.sql", "r", encoding="utf-8") as f:
 cursor.executescript(sql_script)
 conn.commit()
 
-# 2. students кестесінен GPA пен applications кестесінен total_points мәндерін алу
+# students кестесінен GPA пен applications кестесінен total_points мәндерін алу
 cursor.execute("""
     SELECT s.gpa, a.total_points 
     FROM students s
@@ -34,16 +34,17 @@ y = np.array([row[1] for row in rows])
 
 print(f"--- Дерекқордан сәтті жүктелді: {len(X)} студент мәліметі ---")
 
-# 3. Деректерді оқыту және тест жиынтығына бөлу
+# Деректерді оқыту және тест жиынтығына бөлу
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
 
-# 4. Сызықтық регрессия моделін құру және оқыту
+#  Сызықтық регрессия моделін құру және оқыту
 model = LinearRegression()
 model.fit(X_train, y_train)
 
-# 5. Болжам жасау және сапасын бағалау
+# 
+# Болжам жасау және сапасын бағалау
 y_pred = model.predict(X_test)
 
 print("\n--- Модель нәтижелері (Нақты дерекқор негізінде) ---")
