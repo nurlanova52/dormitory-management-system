@@ -14,7 +14,7 @@ documents = [
 embeddings = model.encode(documents)
 print("Embedding өлшемі:", embeddings.shape)
 
-query = "Жатақханаға қалай кіруге болады және қандай рұқсат керек?"
+query = "Бөлмедегі жөндеу немесе сантехника ақаулары бойынша өтінім кімге жіберіледі?"
 query_embedding = model.encode([query])
 
 similarities = cosine_similarity(query_embedding, embeddings)[0]

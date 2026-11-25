@@ -68,4 +68,4 @@ context = retrieve(query)
 answer = generate_answer(query, context)
 
 print("Сұрақ:", query)
-print("Жауап:", answer)
+print("Жауап:", answer) 
